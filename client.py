@@ -37,7 +37,7 @@ def start_client():
                 #                 client_socket.send(message.encode('utf-8'))
                         print("Réponse du serveur \n", response)
                         message = input("Message du client : ")
-                        client_socket.send(message.encode('utf-8'))       
+                        client_socket.send(message.encode('utf-8'))    
                 
         except Exception as e:
                 print(e) 

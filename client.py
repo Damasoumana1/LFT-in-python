@@ -1,72 +1,43 @@
-
 import socket
-import threading
-import requests
-import os
+
+# Define the server's IP address and port
+server_ip = '127.0.0.1'
+server_port = 3000
 
 
-def start_client():
-        isDownloading = False
-        try:
-                
-                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_socket.connect(('192.168.1.76', 1234))
-                print("Connecté au serveur sur le port 1234...")
-
-                while True:
-                        # message = input("Message du client : ")
-                        # client_socket.send(message.encode('utf8'))
-                        response = client_socket.recv(1024).decode('ISO-8859-1')
-                        if response=="yes":
-                                isDownloading = True
-                        elif response=="no":
-                                isDownloading = False
-                        print(isDownloading)
-                #         if isDownloading:
-                #                 print("dow")
-                #                 f = open(".\\test.jpg",'xb') # Open in binary
-                #                 l = client_socket.recv(1024)
-                #                 while (l):
-                #                         f.write(l)
-                #                         l = client_socket.recv(1024)
-                #                 f.close()
-
-                #         else:
-                #                 print("Réponse du serveur \n", response)
-                #                 message = input("Message du client : ")
-                #                 client_socket.send(message.encode('utf-8'))
-                        print("Réponse du serveur \n", response)
-                        message = input("Message du client : ")
-                        client_socket.send(message.encode('utf-8'))    
-                
-        except Exception as e:
-                print(e) 
-        finally:
-                client_socket.close()       
-
-        
-# def afficher_contenu_dossier(response):
-#         contenu = os.listdir(response)
-#         for element in contenu:
-#             chemin = os.path.join(response, element)
-#         if os.path.isdir(chemin):
-#             print("response :", element)
-#         else:
-#             print("Fichier :", element)
-#             response = "FILE-TRANSFERT-MAIN/file.txt"
-#         afficher_contenu_dossier(response)
 
 
-        # url = 'https://www.example.com/file.txt'
-        # response = requests.get(url)
-        # with open('file.txt', 'wb') as file:
-        #     file.write(response.content)
-        
-        
-
-    
-# Pour démarrer le client
-start_client()
-
-
+while True:
+    print("Menu:")
+    print("1. List files on server")
+    print("2. Download a file")
+    print("3. Quit")
+    choice = input("Enter your choice: ")
+    # Create a socket and connect to the server
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((server_ip, server_port))
+    if choice == '1':
+        # Request to list files
+        client_socket.send('LIST'.encode())
+        files = client_socket.recv(1024).decode("utf-8")
+        print("Files on server:\n", files)
+    elif choice == '2':
+        # Request to download a file
+        filename = input("Enter the filename to download: ")
+        client_socket.send(f'GET {filename}'.encode())
+        data = client_socket.recv(1024)
+        if data == b'File not found':
+            print("File not found on the server.")
+        else:
+            with open(filename, 'wb') as file:
+                 while data:
+                    file.write(data)
+                    data = client_socket.recv(1024)
+            print(f"{filename} downloaded successfully.")
+    elif choice == '3':
+        break
+    else:
+        print("Invalid choice")
+    client_socket.close()
+# Close the client socket
 
